@@ -1,65 +1,47 @@
-﻿new DayInfo().Day1();
+﻿using System.Reflection;
+using System.Text.RegularExpressions;
+using adventOfCode23.FirstDays;
 
-class DayInfo
+var isRunningInCi = args.Length > 1 && args[1..].Contains("--ci");
+
+async Task UpdateReadme()
 {
-    string[] CleanInput(string s)
-    {
-        var lines = s.Split(Environment.NewLine);
+    // This method only updates README file so skip it when running in CI
+    if (isRunningInCi) return;
 
-        return lines.Select(l => l.Trim()).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+    if (Environment.CurrentDirectory.Split("/")[^4] != "adventOfCode23")
+    {
+        Console.WriteLine("SKIP");
+        return;
     }
 
-    string[] CleanInputFile(string file)
-    
+    await using var stream = File.Open("../../../../README.md", FileMode.Open);
+    var reader = new StreamReader(stream);
+    var writer = new StreamWriter(stream);
+
+    while (!reader.EndOfStream)
     {
-        return CleanInput(File.ReadAllText(file));
+        var line = await reader.ReadLineAsync();
+        var isComment = line is not null && line.Contains("<!--") &&
+                        line.Split("<!--")[1].Split("-->")[0].Trim() == "solution days";
+        if (!isComment) continue;
+
+        stream.Position -= line.Length + 1;
+        var day = typeof(FirstDays).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+            .Select(m => new Regex(@"Day(\d?\d$)").Match(m.Name).Groups[1].Value)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(int.Parse)
+            .Max();
+        await writer.WriteLineAsync(
+            $"The solutions of day 1 to {day} can be found in [FirstDays/FirstDays.cs](adventOfCode23/FirstDays/FirstDays.cs) <!-- solution days -->");
+        break;
     }
-    
-public void Day1()
-{
-     var input =CleanInputFile("day1.txt");
-     var result = new List<int>();
-     foreach (var line in input)
-     {
-         int? left = null;
-         int? right = null;
-         var x = new string[] {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
-         
-         for (int i = 0; i < line.Length; i++)
-         {
-             if (Char.IsDigit(line[i]))
-             {
-                 left = int.Parse(line[i].ToString());
-                 break;
-             }
 
-             var match = x.Select((num, xi) => num == line.Substring(i, Math.Min(num.Length, line.Length - i )) ? xi : -1).Where(ix => ix != -1).ToArray();
-             if (match.Length > 0)
-             {
-                 left = match[0] + 1;
-                 break;
-             }
-             
-         }
+    await writer.FlushAsync();
+}
 
-         for (int i = line.Length - 1; i >= 0; i--)
-         {
-             
-             if (Char.IsDigit(line[i]))
-             {
-                 right = int.Parse(line[i].ToString());
-                 break;
-             }
-             var match = x.Select((num, xi) => num == line.Substring(i,  Math.Min(num.Length, line.Length - i)) ? xi : -1).Where(ix => ix != -1).ToArray();
-             if (match.Length > 0)
-             {
-                 right = match[0] + 1;
-                 break;
-             }
-         }
-         
-         result.Add(int.Parse(left.ToString() + right.ToString()));
-     }
-    Console.WriteLine(result.Sum());
-}
-}
+var updateReadmeTask = UpdateReadme();
+
+new FirstDays().Run();
+
+await updateReadmeTask;

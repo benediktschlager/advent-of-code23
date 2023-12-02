@@ -2,6 +2,12 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adventOfCode23", "adventOfCode23\adventOfCode23.csproj", "{6A076074-0DCC-47C4-A5B4-72800AD42455}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{7E3B03D9-FE13-4CCE-8BC2-A31B3900CE14}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+		.github\workflows\build-dotnet.yml = .github\workflows\build-dotnet.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
