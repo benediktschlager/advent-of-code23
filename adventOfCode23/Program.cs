@@ -22,7 +22,8 @@ async Task UpdateReadme()
     while (!reader.EndOfStream)
     {
         var line = await reader.ReadLineAsync();
-        var isComment = line is not null && line.Contains("<!--") &&
+        if (line is null) continue;
+        var isComment = line.Contains("<!--") &&
                         line.Split("<!--")[1].Split("-->")[0].Trim() == "solution days";
         if (!isComment) continue;
 
