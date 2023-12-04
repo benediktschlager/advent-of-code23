@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using adventOfCode23.FirstDays;
 
-var isRunningInCi = args.Length > 1 && args[1..].Contains("--ci");
+var isRunningInCi = args.Length >= 1 && args.Contains("--ci");
 
 async Task UpdateReadme()
 {
@@ -11,7 +11,7 @@ async Task UpdateReadme()
 
     if (Environment.CurrentDirectory.Split("/")[^4] != "adventOfCode23")
     {
-        Console.WriteLine("SKIP");
+        Console.WriteLine($"SKIP: (CI={isRunningInCi})");
         return;
     }
 
@@ -43,6 +43,6 @@ async Task UpdateReadme()
 
 var updateReadmeTask = UpdateReadme();
 
-new FirstDays().Run();
+new FirstDays(isRunningInCi).Run();
 
 await updateReadmeTask;

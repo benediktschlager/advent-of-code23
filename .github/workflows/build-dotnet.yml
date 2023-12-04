@@ -20,5 +20,5 @@ jobs:
 
       - name: Run
         working-directory: adventOfCode23
-        run: dotnet run --ci
+        run: dotnet run -c Release -- --ci
 

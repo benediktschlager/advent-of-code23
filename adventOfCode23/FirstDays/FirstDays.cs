@@ -1,9 +1,17 @@
 using System.Text.RegularExpressions;
+using static System.Text.RegularExpressions.Regex;
 
 namespace adventOfCode23.FirstDays;
 
 public class FirstDays
 {
+    private readonly bool _isCi;
+
+    public FirstDays(bool isCi)
+    {
+        _isCi = isCi;
+    }
+
     private string[] CleanInput(string s)
     {
         var lines = s.Split(Environment.NewLine);
@@ -196,6 +204,44 @@ public class FirstDays
         Console.WriteLine($"Sum: {sum}");
     }
 
+    private void Day4()
+    {
+        Console.BackgroundColor = ConsoleColor.DarkGray;
+        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.WriteLine("Day 4");
+        // What about 10378710?
+        Console.ResetColor();
+        var input = CleanInputFile("day4.txt");
+        var result = 0;
+
+        var cards = new Dictionary<int, int>();
+        foreach (var line in input)
+        {
+            var groups = Match(line,
+                @"Card +(\d+): {1,2}(?:((\d+) {1,2})+)\| {1,2}(:?(:?(\d+) {0,2})+)").Groups;
+            var (cardNr, winNr, haveNr) = (int.Parse(groups[1].Value), groups[2].Captures, groups[5].Captures);
+            var winNrP = winNr.Select(n => int.Parse(n.Value));
+            var haveNrP = haveNr.Select(n => int.Parse(n.Value));
+            var wonCount = haveNrP.Count(n => winNrP.Contains(n));
+            cards[cardNr] = wonCount;
+        }
+
+
+        var todos = new Queue<int>(cards.Keys);
+
+        while (todos.Count > 0)
+        {
+            var nr = todos.Dequeue();
+            var wonCount = cards[nr];
+            foreach (var n in Enumerable.Range(nr + 1, wonCount)) todos.Enqueue(n);
+
+            //Console.WriteLine($"Won {wonCount} by card {card}");
+            result += 1;
+        }
+
+        Console.WriteLine($"Total Points are {result}");
+    }
+
     public void Run(int? day = null)
     {
         var today = DateTime.Now.Day;
@@ -209,6 +255,9 @@ public class FirstDays
                 break;
             case 3:
                 Day3();
+                break;
+            case 4:
+                Day4();
                 break;
             default:
                 Console.WriteLine("day is missing!");
